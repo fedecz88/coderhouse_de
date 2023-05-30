@@ -14,6 +14,7 @@ La interacción con la BD se realiza vía: sqlalchemy
     - nba_api               > pip install nba_api
     - sqlalchemy-redshift   > pip install sqlalchemy-redshift
     - redshift_connector    > pip install sqlalchemy-redshift_connector
+- Tener la carpeta Archivos con el archivo de configuración y la private key.
 
 ### Resumen del proceso
 1. Cargar la configuración desde un JSON cifrado con RSA: cargar_configuracion()
@@ -22,6 +23,7 @@ La interacción con la BD se realiza vía: sqlalchemy
 4. Ejecutar el proceso EXTRACT de Equipos y Jugadores.
 5. Ejecutar el proceso EXTRACT - LOAD de Premios (por cada Jugador se recuperan los premios y se cargan en la fáctica). 
 
+**Observación:** La API gratuita a veces falla por timeout, el error está capturado y lo que se hace es omitir el registro y seguir procesando.
 
 ### Información asociada
 - Manipulación de AWS: https://aws.amazon.com/blogs/big-data/use-the-amazon-redshift-sqlalchemy-dialect-to-interact-with-amazon-redshift/
