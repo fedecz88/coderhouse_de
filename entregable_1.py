@@ -3,8 +3,6 @@
 #pip install nba_api
 from nba_api.stats.static import players, teams
 from nba_api.stats.endpoints import playerawards
-#import pandas as pd
-#import time
 
 #Manipulación de AWS
 #https://aws.amazon.com/blogs/big-data/use-the-amazon-redshift-sqlalchemy-dialect-to-interact-with-amazon-redshift/
@@ -15,18 +13,15 @@ from sqlalchemy import orm as sa_orm
 from sqlalchemy.engine.url import URL
 
 #Cifrado y carga de archivo de config
-import rsa
-import json
-import base64
-import os
+import rsa, json, base64, os
 from os import path
 
 #Variables y constantes globales
-CONFIG_PATH = 'Coderhouse\Archivos'
+CONFIG_PATH = 'Archivos'
 
 config_dic = { #Diccionario con la configuración de la app
     'request_timout': 50,   #Timeout para los requests
-    'player_limit': 5,      #Límite de jugadores a procesar. -1: Sin limite.
+    'player_limit': 50,      #Límite de jugadores a procesar. -1: Sin limite.
     'error_limit': 100       #Límite de errores a partir del cual se aborta la carga.
 } 
 
@@ -67,7 +62,6 @@ def redshift_conectar():
 
 def redshift_crear_factica(table_name, engine):
     #Crea la tabla fáctica en RedShift
-
     metadata = sa.MetaData()
 
     factTable = sa.Table(
@@ -102,7 +96,6 @@ def redshift_crear_factica(table_name, engine):
     return factTable
 
 if __name__ == '__main__':
-
     #Cargar la configuración desde el archivo
     cargar_configuracion()
 
