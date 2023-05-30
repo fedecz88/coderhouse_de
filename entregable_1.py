@@ -178,6 +178,7 @@ if __name__ == '__main__':
                         player_id = player['id'],
                         first_name = player['first_name'],
                         last_name = player['last_name'],
+                        is_active = player['is_active'],
                         team_id = team['id'],
                         team = team['full_name'],
                         team_abb = team['abbreviation'],
