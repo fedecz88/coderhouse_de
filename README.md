@@ -1,6 +1,32 @@
 # coderhouse_de
 Proyecto de Data Engineering de Coderhouse
 
+## Entregable N°2
+### Objetivo
+Se hace uso de Pandas para organizar y limpiar los datos obtenidos de la API para, luego de la transformación y análisis, hacer la carga en la BD.
+
+Se hace la entrega en formato Jupyter para poder hacerle mejor seguimiento de acuerdo a lo solicitado.
+
+**Observación:** A modo de observación de esta entrega, se cambia la forma de obtener los datos del endpoint de Awards debido a que, por ser una API gratiuita, no tiene la mejor performance. Lo que se hizo fue exportar esos datos a un archivo CSV (premios.csv) que se adjunta en la sección Archivos para poder trabajar mejor.
+
+### Requisitos previos
+- Instalar la bibliotecas:
+    - nba_api               > pip install nba_api
+    - sqlalchemy-redshift   > pip install sqlalchemy-redshift
+    - redshift_connector    > pip install sqlalchemy-redshift_connector
+    - rsa                   > pip install rsa
+- Tener la carpeta Archivos con el archivo de configuración, la private key y premios.csv.
+
+### Resumen del proceso
+1. Cargar la configuración desde un JSON cifrado con RSA: cargar_configuracion()
+2. Ejecutar el proceso EXTRACT de Equipos, Jugadores y Premios. Se cargan los datos obtenidos en DataFrames de Pandas.  [EXTRACT]
+3. Analizar la información de los DFs y realizar limpieza (de nulos, duplicados, corrección de formato).  [TRANSFORM]
+4. Se hace el merge de los 3 DFs en uno solo (factica_df) que se utilizará para la carga en la BD. 
+5. Analizar la información del DF de la fáctica y realizar limpieza.
+6. Conectar a la BD Redshift, crear la sesión y la tabla.
+7. Iterar la factica_df y cargar los registros en la BD. [LOAD]
+
+
 ## Entregable N°1
 ### Objetivo
 Utilizar una API gratuita de NBA (free-nba) para obtener información de los Equipos y Jugadores (activos e inactivos) de la liga de basquet.
