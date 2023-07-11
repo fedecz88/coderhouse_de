@@ -1,7 +1,16 @@
 {
-    "host": "data-engineer-cluster.cyhh5bfevlmn.us-east-1.redshift.amazonaws.com",
-    "cPort": "IjyDQlhKtT3PLIfWc11oV3HnuCVaVhQctRRAsGjBhRx0cG6FWYnTM4TlT+NTeQZoq9vRpKi/xP1HAlq6ZVyhqA==",
-    "cDatabase": "j4wupMN3Ez6pvE7H3jT2moi63ZGyVPT7baGUqW4kWYdb34wbsXC+oPmY6TsafxvkX0+wh+CY+zrIbF0Ah8s6QA==",
-    "cUser": "Mhu4ftezie68hLWFe1jY/I6p71iyat2LgIJSVAxpWvMBWcKkYWRJRMJ586h6euEZIaWPGnee/1XkWLjHU4kw9w==",
-    "cPass": "sAzyPBG8yF+iB0z/gNjSU/9ExadJ/3oYf9hCM0306U6jLp+Sb07eYsgqEZ7hmExNXKAWYhYRsZJZ847K93vcRw=="
+    "FACT_TABLE_NAME": "f_premios_obtenidos_2",
+    "REQUEST_TIMEOUT": 50,
+    "PLAYER_LIMIT": 500,
+    "ERROR_LIMIT": 10,
+    "REGENERAR_FACTICA": false,
+    "PLAYER_ID_UPD": 76003,
+    "CSV_PREMIOS": "premios.csv",
+    "DRIVER_JAR": "postgresql-42.5.2.jar",
+    "JDBC_DRIVER_REDSHIFT": "org.postgresql.Driver",
+    "HOST_REDSHIFT": "data-engineer-cluster.cyhh5bfevlmn.us-east-1.redshift.amazonaws.com",
+    "cPORT_REDSHIFT": "IjyDQlhKtT3PLIfWc11oV3HnuCVaVhQctRRAsGjBhRx0cG6FWYnTM4TlT+NTeQZoq9vRpKi/xP1HAlq6ZVyhqA==",
+    "cDATABASE_REDSHIFT": "j4wupMN3Ez6pvE7H3jT2moi63ZGyVPT7baGUqW4kWYdb34wbsXC+oPmY6TsafxvkX0+wh+CY+zrIbF0Ah8s6QA==",
+    "cUSER_REDSHIFT": "Mhu4ftezie68hLWFe1jY/I6p71iyat2LgIJSVAxpWvMBWcKkYWRJRMJ586h6euEZIaWPGnee/1XkWLjHU4kw9w==",
+    "cPASS_REDSHIFT": "sAzyPBG8yF+iB0z/gNjSU/9ExadJ/3oYf9hCM0306U6jLp+Sb07eYsgqEZ7hmExNXKAWYhYRsZJZ847K93vcRw=="
 }
