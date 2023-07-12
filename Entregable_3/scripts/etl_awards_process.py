@@ -64,17 +64,19 @@ def extact_premios(spark_s):
             result = playerawards.PlayerAwards(player_id=config_dic['PLAYER_ID_UPD'], timeout=config_dic['REQUEST_TIMEOUT']).get_normalized_dict()
             premios_df = spark_s.createDataFrame(data=result['PlayerAwards'], schema=schema)
         
+        premios_df = premios_df.toPandas()
+
     except Exception as error:
         print(f"\t\tError al leer de la API: {error}.")
         return None
         
     else:
-        premios_df = premios_df.toPandas()
-        
         #Corrijo posibles errores
+        print("\t\tCorrigiendo DF de Premios.")
         #ALL_NBA_TEAM_NUMBER debe ser un INT
         premios_df['ALL_NBA_TEAM_NUMBER'] = premios_df['ALL_NBA_TEAM_NUMBER'].str.replace('.0', '') #Eliminar formato de float
-        premios_df['ALL_NBA_TEAM_NUMBER'] = premios_df['ALL_NBA_TEAM_NUMBER'].str.replace('(null)', '0') #Eliminar valores que no son número
+        premios_df['ALL_NBA_TEAM_NUMBER'] = premios_df['ALL_NBA_TEAM_NUMBER'].str.replace(r"\(.*\)","0", regex=True) #Eliminar valores que no son número
+        premios_df['ALL_NBA_TEAM_NUMBER'] = premios_df['ALL_NBA_TEAM_NUMBER'].str.replace('', '0') #Eliminar valores que no son número
         premios_df['ALL_NBA_TEAM_NUMBER'].fillna('0',inplace=True) #Completar los campos en NULL con 0
         premios_df['ALL_NBA_TEAM_NUMBER'] = premios_df['ALL_NBA_TEAM_NUMBER'].astype('int32')
 
@@ -245,10 +247,10 @@ if __name__ == '__main__':
     print(f">>>>>>>>> TEST_SPARK: {config_dic}")
 
     #Crear sesión de Spark
-    #spark_s = SparkSession.builder.master("local[1]").appName("Test_Spark").config("spark.jars", config_dic['DRIVER_PATH']).config("spark.executor.extraClassPath", config_dic['DRIVER_PATH']).getOrCreate() 
+    spark_s = SparkSession.builder.master("local[1]").appName("Test_Spark").config("spark.jars", config_dic['DRIVER_PATH']).config("spark.executor.extraClassPath", config_dic['DRIVER_PATH']).getOrCreate() 
 
     #EXTRACT
-    #teams_df, players_df, premios_df = etl_extract()
+    teams_df, players_df, premios_df = etl_extract(spark_s)
 
     #TRANSFORM
     #factica_df = etl_transform(teams_df, players_df, premios_df)
@@ -256,4 +258,4 @@ if __name__ == '__main__':
     #LOAD
     #etl_load(spark_s, factica_df)
 
-    #print(f"Cantidad de registros en la fáctica: {config_dic['MAX_ROWID']}")
+    print(f" >>>>>>>>>>>>>> TEST_SPARK: IDs de jugadores con premios {premios_df['PERSON_ID'].unique()}")
