@@ -1,5 +1,5 @@
 {
-    "FACT_TABLE_NAME": "f_premios_obtenidos_2",
+    "FACT_TABLE_NAME": "f_premios_obtenidos",
     "REQUEST_TIMEOUT": 50,
     "PLAYER_LIMIT": 500,
     "ERROR_LIMIT": 10,

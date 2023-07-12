@@ -44,7 +44,7 @@ docker-compose up --build
     2.2. Task `clean_task`: Elimina los registros asociados al id del parámetro `PLAYER_ID_UPD` (config.json). Es para simular la carga de una novedad.
     2.3. Task `spark_etl_task`: Delega la ejecución del ETL al nodo de Spark.
 
-### Detalle del ETL (`scripts/etl_test.py`)
+### Detalle del ETL (`scripts/etl_awards_process.py`)
 1. Crear la sesión de Spark.
 2. Ejecutar el proceso EXTRACT de Equipos, Jugadores y Premios. Se utiliza Spark para esta tarea.  [EXTRACT]
 3. Se cargan los datos obtenidos en DataFrames de Pandas.

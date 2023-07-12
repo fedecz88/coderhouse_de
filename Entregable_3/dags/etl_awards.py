@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 
 from etl_utils import cargar_configuracion
 from etl_connections import redshift_crear_factica, redshift_eliminar_registros
-from etl_extract import etl_extract_test
 
 #Cargar la configuración
 args = {
@@ -49,7 +48,7 @@ with DAG(
 
     spark_etl_task = SparkSubmitOperator(   ##Temporal, falta habilitar el ETL.
         task_id="spark_etl_task",
-        application=f"{args['SCRIPTS_PATH']}/etl_test.py",
+        application=f"{args['SCRIPTS_PATH']}/etl_awards_process.py",
         conn_id="spark_default",
         dag=dag,
         driver_class_path=args['DRIVER_PATH'],
