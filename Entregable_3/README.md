@@ -26,7 +26,16 @@ docker build -t my_spark .
 ```bash
 docker-compose up --build
 ```
-5. Finalmente, acceder al Airflow (airflow/airflow) y lanzar el DAG `etl_awards`
+5. Acceder al Airflow (airflow/airflow).
+6. Configurar la conexión con Spark. En la pestaña `Admin -> Connections` crear una nueva conexión con los siguientes datos:
+    * Conn Id: `spark_default`
+    * Conn Type: `Spark`
+    * Host: `spark://spark`
+    * Port: `7077`
+
+7. Lanzar el DAG `etl_awards`
+    * Observación_1: En caso de querer completar la fáctica desde el CSV, ajustar el parámetro `REGENERAR_FACTICA` en `archivos/config.json` a 1. Dropea la tabla y la re-crea.
+    * Observación_2: Se puede ir ajustando el parámetro `PLAYER_ID_UPD` en `archivos/config.json` para simular distintas novedades. Valores posibles: 76003 | 1628389 | 200746 | 335
 
 ### Resumen del proceso
 1. Carga de la configuración para la app en un diccionario. Se carga desde un JSON cifrado con RSA y con las variables de entorno. Función: cargar_configuracion()
