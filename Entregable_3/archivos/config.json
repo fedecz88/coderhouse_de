@@ -1,0 +1,11 @@
+{
+    "FACT_TABLE_NAME": "f_premios_obtenidos_2",
+    "REQUEST_TIMEOUT": 50,
+    "PLAYER_LIMIT": 500,
+    "ERROR_LIMIT": 10,
+    "REGENERAR_FACTICA": 0,
+    "PLAYER_ID_UPD": 76003,
+    "CSV_PREMIOS": "premios.csv",
+    "cUSER_REDSHIFT": "Mhu4ftezie68hLWFe1jY/I6p71iyat2LgIJSVAxpWvMBWcKkYWRJRMJ586h6euEZIaWPGnee/1XkWLjHU4kw9w==",
+    "cPASS_REDSHIFT": "sAzyPBG8yF+iB0z/gNjSU/9ExadJ/3oYf9hCM0306U6jLp+Sb07eYsgqEZ7hmExNXKAWYhYRsZJZ847K93vcRw=="
+}
