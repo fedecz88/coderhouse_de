@@ -31,8 +31,7 @@ def cargar_configuracion(lst):
 
 
 if __name__ == '__main__':
-#https://medium.com/codex/executing-spark-jobs-with-apache-airflow-3596717bbbe3
-    #config_dic.update(dict(sys.argv[1]))
+    #https://medium.com/codex/executing-spark-jobs-with-apache-airflow-3596717bbbe3
 
     cargar_configuracion(sys.argv)
 

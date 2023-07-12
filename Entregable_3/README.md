@@ -2,24 +2,49 @@
 Proyecto de Data Engineering de Coderhouse
 
 ## Entregable N°3
+### PENDIENTES
+Habilitar el ETL utilizando Spark.
+Por el momento está entregado con una función dummy que se utilizó para probar el envío de parámetros de configuración a Spark.
+
 ### Objetivo
 Se hace uso de Spark para recuperar datos desde una API y un CSV, Pandas para organizar, limpiar y Transformar los datos obtenidos, y Spark nuevamente para la carga de los datos en RedShift.
 
 Además se agrega el uso de Airflow para poder ejecutar las tareas en forma individual.
 
-### Requisitos previos
-- Instalar la bibliotecas:
-    - nba_api               > pip install nba_api
-    - rsa                   > pip install rsa
-- Tener la carpeta Archivos con el archivo de configuración, la private key y premios.csv.
+### Pasos para la ejecución
+1. Hacer pull de toda la carpeta Entregable_3
+2. Crear las carpetas necesarias:
+```bash
+mkdir -p dags,logs,plugins,postgres_data,scripts
+```
+3. Generar las imágenes de Airflow y Spark. Los dockerfiles están ubicados en:`docker_images/`. Es necesario generarlas debido a que están personalizadas, se incluyen las bibliotecas necesarias para la ejecución (nba_api, rsa).
+```bash
+docker build -t my_airflow_2_6_2 .
+docker build -t my_spark .
+```
+4. Ejecutar el docker-compose para crear los contenedores configurados con: La variable de entorno .env - El alta de directorios scripts y archivos (y copia de los archivos que contiene)
+```bash
+docker-compose up --build
+```
+5. Finalmente, acceder al Airflow (airflow/airflow) y lanzar el DAG `etl_awards`
 
 ### Resumen del proceso
-1. Crear la imagen de Airflow y Spark utilizando los dockerfiles de la carpeta docker_images.
+1. Carga de la configuración para la app en un diccionario. Se carga desde un JSON cifrado con RSA y con las variables de entorno. Función: cargar_configuracion()
+2. Ejecución del DAG `etl_awards`:
+    2.1. Task `create_table_task`: Crea la tabla fáctica si no existe, si el parámetro `REGENERAR_FACTICA == 1` (config.json), la elimina y la re-crea.
+    2.2. Task `clean_task`: Elimina los registros asociados al id del parámetro `PLAYER_ID_UPD` (config.json). Es para simular la carga de una novedad.
+    2.3. Task `spark_etl_task`: Delega la ejecución del ETL al nodo de Spark.
 
-1. Cargar la configuración desde un JSON cifrado con RSA: cargar_configuracion()
-2. Ejecutar el proceso EXTRACT de Equipos, Jugadores y Premios. Se cargan los datos obtenidos en DataFrames de Pandas.  [EXTRACT]
-3. Analizar la información de los DFs y realizar limpieza (de nulos, duplicados, corrección de formato).  [TRANSFORM]
-4. Se hace el merge de los 3 DFs en uno solo (factica_df) que se utilizará para la carga en la BD. 
-5. Analizar la información del DF de la fáctica y realizar limpieza.
-6. Conectar a la BD Redshift, crear la sesión y la tabla (por parámetro se puede seleccionar solo actualizar la tabla).
-7. Iterar la factica_df y cargar los registros en la BD. [LOAD]
+### Detalle del ETL (`scripts/etl_test.py`)
+1. Crear la sesión de Spark.
+2. Ejecutar el proceso EXTRACT de Equipos, Jugadores y Premios. Se utiliza Spark para esta tarea.  [EXTRACT]
+3. Se cargan los datos obtenidos en DataFrames de Pandas.
+4. Analizar la información de los DFs y realizar limpieza (de nulos, duplicados, corrección de formato). Se utiliza Pandas.  [TRANSFORM]
+5. Se hace el merge de los 3 DFs en uno solo (factica_df) que se utilizará para la carga en la BD. 
+6. Analizar la información del DF de la fáctica y realizar limpieza.
+7. Delegar a Spark la carga en Redshift del DataFrame asociado a la factica. [LOAD]
+
+### Problemas detectados y su solución
+- Lentitud y desconexión constante del Airflow (se caía el webserver, no se podía conectar a la base postgre, etc). Resultó ser un tema de recursos, se ajustó el .wsl del Docker para que pueda utilizar más memoria.
+
+- Al ejecutar el docker-compose, a veces, tira error al querer intentar levantar el Airflow porque indica que la bd postgresql no está saludable (unhealthy). No implica un problema, si bien el docker-compose se cancela, se puede lanzar nuevamente sin problemas.

@@ -2,7 +2,6 @@ from airflow import DAG
 
 from airflow.operators.python_operator import PythonOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
-#from airflow.models import Variable
 from datetime import datetime, timedelta
 
 from etl_utils import cargar_configuracion
@@ -26,9 +25,6 @@ spark_args_lst = [str(args['USER_REDSHIFT']),
                   str(args['PLAYER_ID_UPD']),
                   str(args['CSV_PREMIOS'])]    #Son parámetros que no se almacenan en la variable de entorno.
 
-def pruebita(**kwargs):
-    print(f">>>>>>>>>>>>>> FEDE_TEST: {kwargs['dag'].default_args}")
-
 with DAG(
     dag_id="etl_awards",
     default_args=args,
@@ -36,14 +32,7 @@ with DAG(
     schedule_interval="@daily",
     catchup=False
 ) as dag:
-    # Tareas
-    test_task = PythonOperator(
-        task_id="test_task",
-        python_callable=pruebita,
-        provide_context=True,
-        dag=dag
-    )
-
+    
     create_table_task = PythonOperator(
         task_id="create_table_task",
         python_callable=redshift_crear_factica,
@@ -58,13 +47,6 @@ with DAG(
         dag=dag
     )
 
-    #test_etl_task = PythonOperator(    ##Temporal, hay que agregar el SparkSubmitOperator
-    #    task_id="test_etl_task",
-    #    python_callable=etl_extract_test,
-    #    provide_context=True,
-    #    dag=dag
-    #)
-
     spark_etl_task = SparkSubmitOperator(   ##Temporal, falta habilitar el ETL.
         task_id="spark_etl_task",
         application=f"{args['SCRIPTS_PATH']}/etl_test.py",
@@ -74,4 +56,4 @@ with DAG(
         application_args=spark_args_lst
     )
 
-    test_task >> create_table_task >> clean_task >> spark_etl_task
+    create_table_task >> clean_task >> spark_etl_task
