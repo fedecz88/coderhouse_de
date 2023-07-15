@@ -1,11 +1,11 @@
 Archivos/public.pem
 Archivos/private.pem
 Archivos/postgresql-42.5.2.jar
-Entregable_3/dags/_pycache_
+Entregable_3/dags/_pycache_/
 Entregable_3/dags_old/
 Entregable_3/logs/
 Entregable_3/plugins/
 Entregable_3/postgres_data/
-Entregable_3/scripts/_pycache_
+Entregable_3/scripts/_pycache_/
 Entregable_3/scripts_old/
 Testing/
