@@ -2,10 +2,6 @@
 Proyecto de Data Engineering de Coderhouse
 
 ## Entregable N°3
-### PENDIENTES
-Habilitar el ETL utilizando Spark.
-Por el momento está entregado con una función dummy que se utilizó para probar el envío de parámetros de configuración a Spark.
-
 ### Objetivo
 Se hace uso de Spark para recuperar datos desde una API y un CSV, Pandas para organizar, limpiar y Transformar los datos obtenidos, y Spark nuevamente para la carga de los datos en RedShift.
 
@@ -36,6 +32,7 @@ docker-compose up --build
 7. Lanzar el DAG `etl_awards`
     * Observación_1: En caso de querer completar la fáctica desde el CSV, ajustar el parámetro `REGENERAR_FACTICA` en `archivos/config.json` a 1. Dropea la tabla y la re-crea.
     * Observación_2: Se puede ir ajustando el parámetro `PLAYER_ID_UPD` en `archivos/config.json` para simular distintas novedades. Valores posibles: 76003 | 1628389 | 200746 | 335
+    * Observación_3: En los "print", se agrega la palabra clave "LOG:" para poder hacer el seguimiento del proceso en el log de la tarea.
 
 ### Resumen del proceso
 1. Carga de la configuración para la app en un diccionario. Se carga desde un JSON cifrado con RSA y con las variables de entorno. Función: cargar_configuracion()
@@ -57,3 +54,7 @@ docker-compose up --build
 - Lentitud y desconexión constante del Airflow (se caía el webserver, no se podía conectar a la base postgre, etc). Resultó ser un tema de recursos, se ajustó el .wsl del Docker para que pueda utilizar más memoria.
 
 - Al ejecutar el docker-compose, a veces, tira error al querer intentar levantar el Airflow porque indica que la bd postgresql no está saludable (unhealthy). No implica un problema, si bien el docker-compose se cancela, se puede lanzar nuevamente sin problemas.
+
+- Al querer establecer la conexión con Redshift en el ETL sale error de posgre.
+    ```Error: Suppressed: org.postgresql.util.PSQLException: FATAL: no PostgreSQL user name specified in startup packet```
+    Se había un problema con la variable de entorno, no estaba completa.

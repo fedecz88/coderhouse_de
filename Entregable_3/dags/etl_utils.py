@@ -13,7 +13,7 @@ def cargar_configuracion():
     #Completa el diccionario global con la configuración necesaria
     #fullpath = os.path.join(os.getcwd(), config_dic['CONFIG_PATH'])
     #os.chdir(fullpath)
-    print(f'Directorio actual: {os.getcwd()}')
+    print(f'LOG: Directorio actual: {os.getcwd()}')
 
     #Cargar private key
     with open(file_path('private.pem'), 'r') as file:
@@ -24,7 +24,6 @@ def cargar_configuracion():
         jConfig = json.load(file)
 
     #Recupero variables de entorno
-    config_dic['URL_REDSHIFT'] = os.getenv('REDSHIFT_URL')
     config_dic['DATABASE_REDSHIFT'] = os.getenv('REDSHIFT_DB')
     config_dic['SCHEMA_REDSHIFT'] = os.getenv('REDSHIFT_SCHEMA')
     config_dic['HOST_REDSHIFT'] = os.getenv('REDSHIFT_HOST')
@@ -43,5 +42,7 @@ def cargar_configuracion():
     config_dic['CSV_PREMIOS'] = file_path(jConfig['CSV_PREMIOS'])
     config_dic['SCRIPTS_PATH'] = os.path.abspath('scripts')
     config_dic['DRIVER_PATH'] = file_path(os.getenv('DRIVER_JAR'))
+
+    config_dic['URL_REDSHIFT'] = f"jdbc:postgresql://{config_dic['HOST_REDSHIFT']}:{config_dic['PORT_REDSHIFT']}/{config_dic['DATABASE_REDSHIFT']}?user={config_dic['USER_REDSHIFT']}&password={config_dic['PASS_REDSHIFT']}"
 
     return config_dic

@@ -15,7 +15,6 @@ import sys, os
 config_dic = {}
 
 def cargar_configuracion(lst):
-    config_dic['URL_REDSHIFT'] = os.getenv('REDSHIFT_URL')
     config_dic['DATABASE_REDSHIFT'] = os.getenv('REDSHIFT_DB')
     config_dic['SCHEMA_REDSHIFT'] = os.getenv('REDSHIFT_SCHEMA')
     config_dic['HOST_REDSHIFT'] = os.getenv('REDSHIFT_HOST')
@@ -30,6 +29,8 @@ def cargar_configuracion(lst):
     config_dic['REQUEST_TIMEOUT'] = int(lst[5])
     config_dic['PLAYER_ID_UPD'] = int(lst[6])
     config_dic['CSV_PREMIOS'] = lst[7]
+
+    config_dic['URL_REDSHIFT'] = f"jdbc:postgresql://{config_dic['HOST_REDSHIFT']}:{config_dic['PORT_REDSHIFT']}/{config_dic['DATABASE_REDSHIFT']}?user={config_dic['USER_REDSHIFT']}&password={config_dic['PASS_REDSHIFT']}"
 
 ##  ***************************** EXTRACT ***************************** 
 """
@@ -56,23 +57,24 @@ def extact_premios(spark_s):
                 ])
         
         if config_dic["REGENERAR_FACTICA"] == 1:
-            print("\t>>> Inicialización de la fáctica.")
+            print("LOG: \t>>> Inicialización de la fáctica.")
             premios_df = spark_s.read.options(header=True, schema=schema).csv(config_dic['CSV_PREMIOS'])
 
-            print(f"\t\tJugadores recuperados desde el CSV: {premios_df.select('PERSON_ID').distinct().count()}")
+            print(f"LOG: \t\tJugadores recuperados desde el CSV: {premios_df.select('PERSON_ID').distinct().count()}")
         else:
+            print(f"LOG: \t>>> Obteniendo novedades del jugador: {config_dic['PLAYER_ID_UPD']}")
             result = playerawards.PlayerAwards(player_id=config_dic['PLAYER_ID_UPD'], timeout=config_dic['REQUEST_TIMEOUT']).get_normalized_dict()
             premios_df = spark_s.createDataFrame(data=result['PlayerAwards'], schema=schema)
         
         premios_df = premios_df.toPandas()
 
     except Exception as error:
-        print(f"\t\tError al leer de la API: {error}.")
+        print(f"LOG: \t\tError al leer de la API: {error}.")
         return None
         
     else:
         #Corrijo posibles errores
-        print("\t\tCorrigiendo DF de Premios.")
+        print("LOG: \t\tCorrigiendo DF de Premios.")
         #ALL_NBA_TEAM_NUMBER debe ser un INT
         premios_df['ALL_NBA_TEAM_NUMBER'] = premios_df['ALL_NBA_TEAM_NUMBER'].str.replace('.0', '') #Eliminar formato de float
         premios_df['ALL_NBA_TEAM_NUMBER'] = premios_df['ALL_NBA_TEAM_NUMBER'].str.replace(r"\(.*\)","0", regex=True) #Eliminar valores que no son número
@@ -87,25 +89,25 @@ def extact_premios(spark_s):
         return premios_df
     
 def etl_extract(spark_s):
-    print(">>> Proceso de extracción")
+    print("LOG: >>> Proceso de extracción")
 
-    print("\tObteniendo información de los equipos.")
+    print("LOG: \tObteniendo información de los equipos.")
     teams_rdd = spark_s.sparkContext.parallelize(teams.get_teams()) #Recuperar los equipos (guardar resultados de la API como RDD)
     teams_df = spark_s.createDataFrame(teams_rdd)
     teams_df = teams_df.toPandas()  #Convierto el DataFrame a Pandas
     
     teams_df = pa.concat([teams_df, teams_df], ignore_index=True) #Simulo que hay elementos duplicados (a efectos de la práctica)
 
-    print("\tObteniendo información de los jugadores.")
+    print("LOG: \tObteniendo información de los jugadores.")
     players_rdd = spark_s.sparkContext.parallelize(players.get_players())
     players_df = spark_s.createDataFrame(players_rdd)
     players_df = players_df.toPandas()
 
-    print("\tObteniendo información de los premios.")
+    print("LOG: \tObteniendo información de los premios.")
 
     premios_df = extact_premios(spark_s)
 
-    print(">>> Fin del proceso de extracción")
+    print("LOG: >>> Fin del proceso de extracción")
     
     return teams_df, players_df, premios_df
 
@@ -116,27 +118,27 @@ def etl_extract(spark_s):
     Se utiliza Pandas para la transformación.
 """
 def df_drop_duplicates(df, nombre):
-    print("\t>>> Eliminando duplicados del DF.")
+    print("LOG: \t>>> Eliminando duplicados del DF.")
     
     dup_count = len(df[df.duplicated()])
     
     if dup_count != 0:
-        print(f"\t\t(Se detectaron {dup_count} duplicados en {nombre})")
+        print(f"LOG: \t\t(Se detectaron {dup_count} duplicados en {nombre})")
         df = df.drop_duplicates()
         df.reset_index(drop=True, inplace=True)
     else:
-        print(f"\t\t(No se detectaron duplicados en {nombre})")
+        print(f"LOG: \t\t(No se detectaron duplicados en {nombre})")
     return df
 
 def etl_transform(teams_df, players_df, premios_df):
-    print(">>> Proceso de transformación")
+    print("LOG: >>> Proceso de transformación")
     
     try:
         len(teams_df.index)
         len(players_df.index)
         len(premios_df.index)
     except:
-        print("\tERROR: Hay DFs erróneos.")
+        print("LOG: \tERROR: Hay DFs erróneos.")
 
     ##TRANSFORM: PREMIOS_DF
     premios_df = df_drop_duplicates(premios_df, 'DF Premios')
@@ -193,29 +195,44 @@ def etl_transform(teams_df, players_df, premios_df):
     factica_df.drop(['first_name','last_name','is_active','PERSON_ID','abbreviation','city','state','year_founded','TYPE','SUBTYPE1','SUBTYPE2'], axis=1, errors='ignore', inplace=True)
     
     #Se eliminan registros que NO tienen equipo asociado
-    print("\t>>> Eliminando registros de Premios sin equipo asociado.")
+    print("LOG: \t>>> Eliminando registros de Premios sin equipo asociado.")
     elim_count = len(factica_df.index)
     factica_df = factica_df[factica_df['TEAM_ID']!=0]
     elim_count -= len(factica_df.index)
-    print(f"\t\t(Se eliminaron {elim_count} registros)")
+    print(f"LOG: \t\t(Se eliminaron {elim_count} registros)")
     
     #Se eliminan duplicados
     factica_df = df_drop_duplicates(factica_df, 'DF Factica')
     
     #Se agrega el ID considerando el max(id) de la tabla
-    idx_from = config_dic['MAX_ROWID'] + 1
+    try:
+        df = spark_s.read.format("jdbc") \
+            .option("url", config_dic['URL_REDSHIFT']) \
+            .option("driver", config_dic['JDBC_DRIVER_REDSHIFT']) \
+            .option("user", config_dic['USER_REDSHIFT']) \
+            .option("password", config_dic['PASS_REDSHIFT']) \
+            .option("dbtable", f"(SELECT max(id) as max FROM {config_dic['FACT_TABLE_NAME']})").load()
+        
+        max_rowid = (lambda x: 0 if x == None else x)(df.collect()[0][0])
+    
+    except:
+        max_rowid = 0
+    
+    print(f"LOG: >>>>>>>>>>> TEST: Máximo ID recuperado: {max_rowid}")
+
+    idx_from = max_rowid + 1
     idx_to = idx_from + len(factica_df.index)
 
     factica_df['ID'] = [x for x in range(idx_from, idx_to)]
     
-    print(">>> Fin del proceso de transformación")
+    print("LOG: >>> Fin del proceso de transformación")
     
     return factica_df
 
 ##  ***************************** LOAD ***************************** 
 """Se utiliza el Dataframe de Spark para grabar en la base de datos."""
 def etl_load(spark_s, factica_df):
-    print(">>> Proceso de carga")
+    print("LOG: >>> Proceso de carga")
     
     df = spark_s.createDataFrame(factica_df)
     
@@ -233,10 +250,10 @@ def etl_load(spark_s, factica_df):
             .mode("append") \
             .save()
         date_end = dt.now()
-        
-        print(f"\t(Tiempo transcurrido: {round((date_end-date_ini).total_seconds(),2)} segs)")
+
+        print(f"LOG: \t(Tiempo transcurrido: {round((date_end-date_ini).total_seconds(),2)} segs)")
     except Exception as error:
-        print(f"Error al cargar la fáctica en la BD: {error}")
+        print(f"LOG: Error al cargar la fáctica en la BD: {error}")
 
 
 if __name__ == '__main__':
@@ -244,8 +261,10 @@ if __name__ == '__main__':
     
     cargar_configuracion(sys.argv)
 
-    print(f">>>>>>>>> TEST_SPARK: {config_dic}")
-
+    #Setear variables de entorno
+    os.environ["SPARK_CLASSPATH"] = config_dic['DRIVER_PATH']
+    os.environ["PYSPARK_SUBMIT_ARGS"] = f"--driver-class-path {config_dic['DRIVER_PATH']} --jars {config_dic['DRIVER_PATH']} pyspark-shell"
+    
     #Crear sesión de Spark
     spark_s = SparkSession.builder.master("local[1]").appName("Test_Spark").config("spark.jars", config_dic['DRIVER_PATH']).config("spark.executor.extraClassPath", config_dic['DRIVER_PATH']).getOrCreate() 
 
@@ -253,9 +272,9 @@ if __name__ == '__main__':
     teams_df, players_df, premios_df = etl_extract(spark_s)
 
     #TRANSFORM
-    #factica_df = etl_transform(teams_df, players_df, premios_df)
+    factica_df = etl_transform(teams_df, players_df, premios_df)
 
     #LOAD
-    #etl_load(spark_s, factica_df)
+    etl_load(spark_s, factica_df)
 
-    print(f" >>>>>>>>>>>>>> TEST_SPARK: IDs de jugadores con premios {premios_df['PERSON_ID'].unique()}")
+    print(f"LOG: >>>>>>>>>>>>>> Fin del proceso de ETL.")

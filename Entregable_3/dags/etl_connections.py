@@ -7,13 +7,13 @@ def redshift_conectar():
     try:
         conn = psy.connect(host=config_dic['HOST_REDSHIFT'], dbname=config_dic['DATABASE_REDSHIFT'], user=config_dic['USER_REDSHIFT'], password=config_dic['PASS_REDSHIFT'], port=config_dic['PORT_REDSHIFT'])
         conn_cur = conn.cursor()
-        print(">>> Conexión a la BD OK.")
+        print("LOG: >>> Conexión a la BD OK.")
         conn_cur.close()
 
         return conn
     
     except:
-        print(">>> Error al conectar a la base de datos.")
+        print("LOG: >>> Error al conectar a la base de datos.")
         return None
 
 def redshift_crear_factica(**kwargs):
@@ -64,9 +64,9 @@ def redshift_crear_factica(**kwargs):
         conn.commit()
         conn.close()
     
-        print(f"Cantidad de registros en la fáctica: {n_rows[0]}")
+        print(f"LOG: Cantidad de registros en la fáctica: {n_rows[0]}")
     except:
-        print("\t\tError al generar la fáctica.")
+        print("LOG: \t\tError al generar la fáctica.")
 
 def redshift_eliminar_registros(**kwargs):
     config_dic.update(kwargs['dag'].default_args)
@@ -78,7 +78,7 @@ def redshift_eliminar_registros(**kwargs):
     sql_delete_values = f"DELETE FROM {table_name} WHERE {column_name} = {value};"
     sql_count = f"""SELECT count(*) FROM {table_name};"""
     
-    print(f"\t>>> Eliminando registros de {table_name}")
+    print(f"LOG: \t>>> Eliminando registros de {table_name}")
     
     try:
         conn = redshift_conectar()
@@ -90,6 +90,6 @@ def redshift_eliminar_registros(**kwargs):
         conn.commit()
         conn.close()
 
-        print(f"Cantidad de registros en la fáctica: {n_rows[0]}")
+        print(f"LOG: Cantidad de registros en la fáctica: {n_rows[0]}")
     except:
-        print("\t\tError al eliminar los registros.")
+        print("LOG: \t\tError al eliminar los registros.")
