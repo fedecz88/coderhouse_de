@@ -37,8 +37,11 @@ docker-compose up --build
 ### Resumen del proceso
 1. Carga de la configuración para la app en un diccionario. Se carga desde un JSON cifrado con RSA y con las variables de entorno. Función: cargar_configuracion()
 2. Ejecución del DAG `etl_awards`:
+
     2.1. Task `create_table_task`: Crea la tabla fáctica si no existe, si el parámetro `REGENERAR_FACTICA == 1` (config.json), la elimina y la re-crea.
+
     2.2. Task `clean_task`: Elimina los registros asociados al id del parámetro `PLAYER_ID_UPD` (config.json). Es para simular la carga de una novedad.
+    
     2.3. Task `spark_etl_task`: Delega la ejecución del ETL al nodo de Spark.
 
 ### Detalle del ETL (`scripts/etl_awards_process.py`)
