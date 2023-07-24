@@ -8,4 +8,9 @@ Entregable_3/plugins/
 Entregable_3/postgres_data/
 Entregable_3/scripts/_pycache_/
 Entregable_3/scripts_old/
+Entregable_4/dags/_pycache_/
+Entregable_4/logs/
+Entregable_4/plugins/
+Entregable_4/postgres_data/
+Entregable_4/scripts/_pycache_/
 Testing/
